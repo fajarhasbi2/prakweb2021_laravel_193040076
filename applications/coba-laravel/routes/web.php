@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Models\Category;
 use App\Models\User;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,8 +16,6 @@ use App\Models\User;
 |
 */
 
-
-
 Route::get('/', function () {
     return view('home', [
         "title" => "Home"
@@ -28,36 +25,38 @@ Route::get('/', function () {
 Route::get('/about', function () {
     return view('about', [
         "title" => "About",
-        "nama" => "Fajar Hasbi Noer",
+        "name" => "Fajar Habi Noer",
         "email" => "193040076.fajar@mail.unpas.ac.id",
         "image" => "Foto Fajar.jpg"
     ]);
 });
 
 
-
-
 Route::get('/posts', [PostController::class, 'index']);
-Route::get('posts/{post}', [PostController::class, 'show']);
+Route::get('/posts/{post:slug}', [PostController::class, 'show']);
 
-Route::get('/categories', function(){
+Route::get('/categories', function () {
     return view('categories', [
         'title' => 'Post Categories',
+        'active' => 'categories',
         'categories' => Category::all()
     ]);
 });
 
-Route::get('/categories/{category:slug}', function(Category $category){
-    return view('category', [
-        'title' => $category->name,
-        'posts' => $category->posts,
-        'category'=> $category->name
+
+Route::get('/categories/{category:slug}', function (Category $category) {
+    return view('posts', [
+        'title' => "Post by Category : $category->name",
+        'active' => 'categories',
+        'posts' => $category->posts->load('category', 'author')
+
     ]);
 });
 
-Route::get('/authors/{user}', function(User $user){
-    return view('post', [
-        'title' => 'User Post',
-        'posts' => $user->posts,
+
+Route::get('/authors/{author:username}', function (User $author) {
+    return view('posts', [
+        'title' => "Post By Author : $author->name",
+        'posts' => $author->posts->load('category', 'author'),
     ]);
 });
